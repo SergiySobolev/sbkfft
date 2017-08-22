@@ -10,12 +10,13 @@ classdef Sbk1dFFT
             obj.spatialSignal = s;
         end
         function r = doFFT(obj)
-            l = length(obj.spatialSignal);
-            r = zeros(1, l);
-            for k=1:l               
-                for j=1:l   
-                    koef = (-i)^((k-1)*(j-1));
-                    r(k) = r(k) + obj.spatialSignal(j)*koef;
+            N = length(obj.spatialSignal);
+            r = zeros(1, N);
+            for k=1:N               
+                for i=1:N   
+                    W = exp(-1j*2*pi/N);
+                    koef = W^((i-1)*(k-1));
+                    r(k) = r(k) + obj.spatialSignal(i)*koef;
                 end
             end;
         end 
