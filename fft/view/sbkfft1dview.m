@@ -49,6 +49,10 @@ function drawSpatial(hObject, handles)
     guidata(hObject, handles);
     
 function drawFrequency(~, handles)   
+    drawMagnitude(handles) 
+    drawPhase(handles);
+    
+function drawMagnitude(handles) 
     fs = 32*str2double(get(handles.textFrequency, 'String'));
     data = get(handles.inputFunction, 'UserData'); 
     y = data.y;
@@ -60,14 +64,25 @@ function drawFrequency(~, handles)
     showOnAxis(handles.frequencyMagnitudeAxis, xfft, abs(fff));
     axes(handles.frequencyMagnitudeAxis);
     plot(xfft,abs(fff));  
-    axis([0,530,min(abs(fff)),1.1*max(abs(fff))]);
+    axis([0,530,min(abs(fff)),1.1*max(abs(fff))]);  
+
     
+function drawPhase(handles)
+    fs = 32*str2double(get(handles.textFrequency, 'String'));
+    data = get(handles.inputFunction, 'UserData'); 
+    y = data.y;
+    N = 2^(nextpow2(length(y))-1);
+    df=fs/N; %frequency resolution
+    sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
+    f=sampleIndex*df;
+    X = 1/N*fftshift(fft(y,N));
+    X2 = X; 
+    threshold = max(abs(X))/10000; %tolerance threshold
+    X2(abs(X)<threshold) = 0;
+    %phase=atan2(imag(X2),real(X2))*180/pi;
+    phase=angle(X2);
     axes(handles.frequencyPhaseAxis);
-    threshold = max(abs(fff))/10000;
-    y2 = y;
-    y2(abs(y)<threshold) = 0;
-    phase = angle(y2);
-    plot(xfft,phase(1:nfft2/2));
+    plot(f,phase);   
 
 function inputFunction_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
